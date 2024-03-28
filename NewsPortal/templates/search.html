@@ -1,0 +1,23 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+  <h1>Поиск новостей</h1>
+  <form method="GET">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Искать</button>
+  </form>
+
+  {% if posts %}
+    <h2>Результаты поиска:</h2>
+    <ul>
+      {% for post in posts %}
+        <li>
+          <h3><a href="{% url 'post_detail' pk=post.pk %}">{{ post.news_title }}</a></h3>
+          <p>{{ post.news_text }}</p>
+          <p>Опубликовано: {{ post.time_in }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}

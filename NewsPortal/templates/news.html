@@ -3,19 +3,40 @@
 {% block title %} Новости {% endblock title %}
 
 {% block content %}
-<h1>Новости</h1>
+  <h1>Новости</h1>
 
-{% if news %}
-  <ul>
-    {% for post in news %}
-      <li>
-        <h2>{{ post.title }}</h2>
-        <p>{{ post.text }}</p>
-        <p>Опубликовано: {{ post.published_date }}</p>
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>Нет новостей.</p>
-{% endif %}
+  {% if news %}
+    <ul>
+      {% for post in news %}
+        <li>
+          <h2><a href="{% url 'post_detail' pk=post.pk %}">{{ post.news_title }}</a></h2>
+          <p>{{ post.news_text }}</p>
+          <p>Опубликовано: {{ post.time_in }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Пагинация -->
+    <div class="pagination">
+      <span class="step-links">
+        {% if news.has_previous %}
+          <a href="?page=1">&laquo; первая</a>
+          <a href="?page={{ news.previous_page_number }}">предыдущая</a>
+        {% endif %}
+
+        <span class="current">
+          Страница {{ news.number }} из {{ news.paginator.num_pages }}.
+        </span>
+
+        {% if news.has_next %}
+          <a href="?page={{ news.next_page_number }}">следующая</a>
+          <a href="?page={{ news.paginator.num_pages }}">последняя &raquo;</a>
+        {% endif %}
+      </span>
+    </div>
+    <!-- Конец пагинации -->
+
+  {% else %}
+    <p>Нет новостей.</p>
+  {% endif %}
 {% endblock content %}
