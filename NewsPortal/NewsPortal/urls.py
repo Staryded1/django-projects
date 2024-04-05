@@ -26,4 +26,6 @@ urlpatterns = [
    
     # сами автоматически подключались когда мы их добавим.
     path('news/', include('news.urls')),
+    path('sign/', include('sign.urls')),
+    path('accounts/', include('allauth.urls')),
 ]
