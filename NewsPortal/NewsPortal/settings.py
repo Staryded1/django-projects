@@ -30,6 +30,14 @@ ALLOWED_HOSTS = []
 
 SITE_ID = 1
 
+DEFAULT_FROM_EMAIL = 'sasha.anisimov.90@bk.ru'
+
+ADMINS = [
+    ('Sasha', 'sasha.anisimov.90@bk.ru'),
+    # список всех админов в формате ('имя', 'их почта')
+]
+SERVER_EMAIL = 'sasha.anisimov.90@bk.ru'  # это будет у нас вместо аргумента FROM в массовой рассылке
+
 # подключаем фронтенд
 STATICFILES_DIRS = [
     BASE_DIR / "static"
@@ -59,11 +67,14 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.socialaccount',
     'allauth.account',
+    'django_apscheduler',
     
     # ... include the providers you want to enable:
     'allauth.socialaccount.providers.yandex',
 ]
 
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

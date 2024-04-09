@@ -10,4 +10,9 @@ class SearchForm(forms.Form):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['author', 'choice_types', 'categories', 'news_title', 'news_text']
+        fields = ['author', 'choice_types', 'categories', 'news_title', 'news_text', 'subscribers']
+
+    def __init__(self, *args, **kwargs):
+        super(PostForm, self).__init__(*args, **kwargs)
+        self.fields['categories'].widget.attrs['class'] = 'form-control'  
+        self.fields['subscribers'].widget.attrs['class'] = 'form-control'  

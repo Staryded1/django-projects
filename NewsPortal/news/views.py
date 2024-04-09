@@ -1,10 +1,21 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
-from .models import Post
+from .models import Post, Category
 from .forms import SearchForm, PostForm
-from django.views.generic import FormView, CreateView, UpdateView, DeleteView
+from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.generic.base import View
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
+from django.utils import timezone
+from .models import send_email_notification
+from django.utils import timezone
+from datetime import timedelta
 
 
 class PostsList(ListView):
@@ -50,6 +61,23 @@ class PostCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     success_url = reverse_lazy('posts_list')
     permission_required = 'news.add_post'
 
+    def form_valid(self, form):
+        # Проверяем количество опубликованных новостей пользователя за последние 24 часа
+        user = self.request.user
+        posts_count = Post.objects.filter(author__user=user, time_in__gte=timezone.now() - timedelta(days=1)).count()
+        if posts_count >= 3:
+            return HttpResponseBadRequest("Вы не можете публиковать более трех новостей в сутки.")
+
+        # Вызываем сохранение формы, чтобы получить объект Post
+        self.object = form.save(commit=False)
+        self.object.author = user.author  # Привязываем автора
+        self.object.save()
+
+        # Отправляем уведомление подписчикам
+        send_email_notification(self.object)
+
+        return HttpResponseRedirect(self.get_success_url())
+
 
 class PostUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Post
@@ -64,3 +92,29 @@ class PostDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     template_name = 'post_confirm_delete.html'
     success_url = reverse_lazy('posts_list')
     permission_required = 'news.delete_post'
+
+class SubscribeCategoryView(View):
+    def post(self, request, category_id):
+        category = get_object_or_404(Category, pk=category_id)
+        user = request.user
+        if user.is_authenticated:
+            if user in category.subscribers.all():
+                category.subscribers.remove(user)
+                subscribed = False
+            else:
+                category.subscribers.add(user)
+                subscribed = True
+            return JsonResponse({'subscribed': subscribed})
+        else:
+            return JsonResponse({'error': 'User is not authenticated'}, status=401)
+        
+def subscribe_category(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+    if request.method == 'POST':
+        if request.user in category.subscribers.all():
+            category.subscribers.remove(request.user)
+            subscribed = False
+        else:
+            category.subscribers.add(request.user)
+            subscribed = True
+        return JsonResponse({'subscribed': subscribed})

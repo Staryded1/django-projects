@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{{ category.name }}</h1>
+  <p>Описание категории: {{ category.description }}</p>
+
+  {% if user.is_authenticated %}
+    {% if user in category.subscribers.all %}
+      <button id="unsubscribe-btn">Отписаться</button>
+    {% else %}
+      <button id="subscribe-btn">Подписаться</button>
+    {% endif %}
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#subscribe-btn').click(function() {
+        $.ajax({
+          type: 'POST',
+          url: '{% url "subscribe_category" category.id %}',
+          success: function(response) {
+            if (response.subscribed) {
+              $('#subscribe-btn').text('Отписаться');
+              $('#subscribe-btn').attr('id', 'unsubscribe-btn');
+            }
+          },
+          error: function(response) {
+            console.log(response);
+          }
+        });
+      });
+
+      $('#unsubscribe-btn').click(function() {
+        $.ajax({
+          type: 'POST',
+          url: '{% url "subscribe_category" category.id %}',
+          success: function(response) {
+            if (!response.subscribed) {
+              $('#unsubscribe-btn').text('Подписаться');
+              $('#unsubscribe-btn').attr('id', 'subscribe-btn');
+            }
+          },
+          error: function(response) {
+            console.log(response);
+          }
+        });
+      });
+    });
+  </script>
+{% endblock %}
