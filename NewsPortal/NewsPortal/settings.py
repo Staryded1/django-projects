@@ -108,6 +108,15 @@ TEMPLATES = [
     },
 ]
 
+# Настройки для Redis Cloud
+REDIS_HOST = 'redis-16409.c304.europe-west1-2.gce.cloud.redislabs.com'
+REDIS_PORT = '16409'
+REDIS_PASSWORD = 'CqHaq72uxQFo0FViqVaC4s35cncnwoWi'
+
+# Конфигурация Celery для использования Redis
+CELERY_BROKER_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_RESULT_BACKEND = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0'
+
 AUTHENTICATION_BACKENDS = [ 
     # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
