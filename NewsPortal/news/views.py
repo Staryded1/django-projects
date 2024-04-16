@@ -16,7 +16,8 @@ from django.utils import timezone
 from .models import send_email_notification
 from django.utils import timezone
 from datetime import timedelta
-
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 class PostsList(ListView):
     model = Post
@@ -24,11 +25,24 @@ class PostsList(ListView):
     context_object_name = 'news'
     paginate_by = 10
 
+    # Применяем кэширование на 5 минут
+    @cache_page(300)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 class PostDetail(DetailView):
     model = Post
     template_name = 'post.html'
     context_object_name = 'post'
+
+    # Применяем кэширование на 5 минут или пока статья не изменится
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        return obj
+
+    @method_decorator(cache_page(300))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 class NewsListView(ListView):
@@ -36,6 +50,11 @@ class NewsListView(ListView):
     template_name = 'news_list.html'
     context_object_name = 'news_list'
     paginate_by = 10
+
+    # Применяем кэширование на 5 минут
+    @cache_page(300)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 class SearchView(ListView):
@@ -107,6 +126,11 @@ class SubscribeCategoryView(View):
             return JsonResponse({'subscribed': subscribed})
         else:
             return JsonResponse({'error': 'User is not authenticated'}, status=401)
+
+    # Применяем кэширование на 1 минуту
+    @cache_page(60)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
         
 def subscribe_category(request, category_id):
     category = get_object_or_404(Category, pk=category_id)

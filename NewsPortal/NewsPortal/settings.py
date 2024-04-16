@@ -108,6 +108,16 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'TIMEOUT': 300,  # Время жизни кэша в секундах (5 минут)
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000  # Максимальное количество записей в кэше
+        }
+    }
+}
+
 # Настройки для Redis Cloud
 REDIS_HOST = 'redis-16409.c304.europe-west1-2.gce.cloud.redislabs.com'
 REDIS_PORT = '16409'
