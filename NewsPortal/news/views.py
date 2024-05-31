@@ -142,3 +142,19 @@ def subscribe_category(request, category_id):
             category.subscribers.add(request.user)
             subscribed = True
         return JsonResponse({'subscribed': subscribed})
+    
+import logging
+from django.http import HttpResponse
+
+# Получаем логгер с именем 'django'
+logger = logging.getLogger('django')
+
+def test_logging_view(request):
+    # Логируем сообщения разных уровней
+    logger.debug('This is a debug message')
+    logger.info('This is an info message')
+    logger.warning('This is a warning message')
+    logger.error('This is an error message')
+    logger.critical('This is a critical message')
+    
+    return HttpResponse("Logging test complete. Check your logs.")
